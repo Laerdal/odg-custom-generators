@@ -35,7 +35,7 @@ def generate_file_content(node: NodeProtocol, headerfile: str, pointers_dict=Non
     # pylint: disable=invalid-name
 
     # Setup the main context to store the data
-    ctx, listindex, variablelist = setup_c_file_context(node)
+    ctx, listindex, variablelist, communicationlist, valueRangeContent  = setup_c_file_context(node)
 
     oldHeaderObjDefinitionContent = ctx.text()
     headerObjDefinitionContent = ctx.text()

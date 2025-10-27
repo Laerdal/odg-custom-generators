@@ -186,11 +186,12 @@ def convert_from_canopen_to_c_type(type):
     type_map["uint64"] = "uint64_t"
     type_map["real32"] = "float"
     type_map["real64"] = "double"
-    if type in illegal_int_values:
-        raise TypeError("referencing illegal type in:", illegal_int_values, "aborting")
-    return type_map.get(type, "char")
+    #if type in illegal_int_values:
+    #    raise TypeError("referencing illegal type in:", illegal_int_values, "aborting")
+    return type_map.get(type, "dummy")
 
 def setup_c_file_context(node: NodeProtocol):
+    # Setup the main context to store the data
     # Setup the main context to store the data
     ctx = CFileContext()
 
@@ -206,12 +207,22 @@ def setup_c_file_context(node: NodeProtocol):
     # Compiling lists of indexes
     rangelist = [idx for idx in node.GetIndexes() if 0 <= idx <= 0x260]
     listindex = [idx for idx in node.GetIndexes() if 0x1000 <= idx <= 0xFFFF]
+    communicationlist = [idx for idx in node.GetIndexes() if 0x1000 <= idx <= 0x11FF]
     variablelist = [idx for idx in node.GetIndexes() if 0x2000 <= idx <= 0xBFFF]
 
     # --------------------------------------------------------------------------
     #                   Declaration of the value range types
     # --------------------------------------------------------------------------
 
+    valueRangeContent = ctx.text()
+    strDefine = ctx.text(
+        "\n#define valueRange_EMC 0x9F "
+        "/* Type for index 0x1003 subindex 0x00 (only set of value 0 is possible) */"
+    )
+    strSwitch = ctx.text("""    case valueRange_EMC:
+      if (*(UNS8*)value != (UNS8)0) return OD_VALUE_RANGE_EXCEEDED;
+      break;
+""")
     ctx.internal_types["valueRange_EMC"] = TypeInfos("UNS8", 0, "valueRange_EMC", True)
     num = 0
     for index in rangelist:
@@ -228,5 +239,31 @@ def setup_c_file_context(node: NodeProtocol):
             ctx.internal_types[rangename] = TypeInfos(
                 typeinfos.type, typeinfos.size, f"valueRange_{num}", typeinfos.is_unsigned
             )
+            minvalue = node.GetEntry(index, 2)
+            maxvalue = node.GetEntry(index, 3)
+            # FIXME: It assumed the data is properly formatted
+            assert isinstance(minvalue, int)
+            assert isinstance(maxvalue, int)
+            strDefine += (
+                f"\n#define valueRange_{num} 0x{index:02X} "
+                f"/* Type {typeinfos.type}, {minvalue} < value < {maxvalue} */"
+            )
+            strSwitch += f"    case valueRange_{num}:\n"
+            if typeinfos.is_unsigned and minvalue <= 0:
+                strSwitch += "      /* Negative or null low limit ignored because of unsigned type */;\n"
+            else:
+                strSwitch += (
+                    f"      if (*({typeinfos.type}*)value < ({typeinfos.type}){minvalue}) return OD_VALUE_TOO_LOW;\n"
+                )
+            strSwitch += (
+                f"      if (*({typeinfos.type}*)value > ({typeinfos.type}){maxvalue}) return OD_VALUE_TOO_HIGH;\n"
+            )
+            strSwitch += "    break;\n"
 
-    return ctx, listindex, variablelist
+    valueRangeContent += strDefine
+    valueRangeContent %= "\nUNS32 {NodeName}_valueRangeTest (UNS8 typeValue, void * value)\n{{"
+    valueRangeContent += "\n  switch (typeValue) {\n"
+    valueRangeContent += strSwitch
+    valueRangeContent += "  }\n  return 0;\n}\n"
+
+    return ctx, listindex, variablelist, communicationlist, valueRangeContent
