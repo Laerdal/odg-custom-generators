@@ -48,9 +48,9 @@ def generate_file_content(node: NodeProtocol, headerfile: str) -> tuple[str, str
         nonlocal headerFileContent
         nonlocal sourceFileContent
 
-        if "valueRange_" in typeinfos.ctype:
-            ctx["subIndexType"] = "uint8_t"
-        elif typeinfos.ctype == "visible_string":
+        #if "valueRange_" in typeinfos.ctype:
+        #    ctx["subIndexType"] = "uint8_t"
+        if typeinfos.ctype == "visible_string":
             ctx["subIndexType"] = "char"
         else:
             ctx["subIndexType"] = convert_from_canopen_to_c_type(typeinfos.ctype)
@@ -523,6 +523,28 @@ const UNS16 {NodeName}_ObjdictSize = sizeof({NodeName}_objdict)/sizeof({NodeName
 
 CO_Data {NodeName}_Data = CANOPEN_NODE_DATA_INITIALIZER({NodeName});
 
+"""
+
+
+    fileContent += """
+// unsigned
+static_assert(sizeof(UNS8) == sizeof(uint8_t), "Error: canfestival and std type size mismatch -- fix .py generator")
+static_assert(sizeof(UNS16) == sizeof(uint16_t), "Error: canfestival and std type size mismatch -- fix .py generator")
+static_assert(sizeof(UNS24) == sizeof(uint32_t), "Error: canfestival and std type size mismatch -- fix .py generator")
+static_assert(sizeof(UNS32) == sizeof(uint32_t), "Error: canfestival and std type size mismatch -- fix .py generator")
+static_assert(sizeof(UNS40) == sizeof(uint64_t), "Error: canfestival and std type size mismatch -- fix .py generator")
+static_assert(sizeof(UNS48) == sizeof(uint64_t), "Error: canfestival and std type size mismatch -- fix .py generator")
+static_assert(sizeof(UNS56) == sizeof(uint64_t), "Error: canfestival and std type size mismatch -- fix .py generator")
+static_assert(sizeof(UNS64) == sizeof(uint64_t), "Error: canfestival and std type size mismatch -- fix .py generator")
+// signed
+static_assert(sizeof(INTEGER8) == sizeof(int8_t), "Error: canfestival and std type size mismatch -- fix .py generator")
+static_assert(sizeof(INTEGER16) == sizeof(int16_t), "Error: canfestival and std type size mismatch -- fix .py generator")
+static_assert(sizeof(INTEGER24) == sizeof(int32_t), "Error: canfestival and std type size mismatch -- fix .py generator")
+static_assert(sizeof(INTEGER32) == sizeof(int32_t), "Error: canfestival and std type size mismatch -- fix .py generator")
+static_assert(sizeof(INTEGER40) == sizeof(int64_t), "Error: canfestival and std type size mismatch -- fix .py generator")
+static_assert(sizeof(INTEGER48) == sizeof(int64_t), "Error: canfestival and std type size mismatch -- fix .py generator")
+static_assert(sizeof(INTEGER56) == sizeof(int64_t), "Error: canfestival and std type size mismatch -- fix .py generator")
+static_assert(sizeof(INTEGER64) == sizeof(int64_t), "Error: canfestival and std type size mismatch -- fix .py generator")
 """
 
     # --------------------------------------------------------------------------

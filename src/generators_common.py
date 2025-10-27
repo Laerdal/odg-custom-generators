@@ -186,9 +186,9 @@ def convert_from_canopen_to_c_type(type):
     type_map["uint64"] = "uint64_t"
     type_map["real32"] = "float"
     type_map["real64"] = "double"
-    #if type in illegal_int_values:
-    #    raise TypeError("referencing illegal type in:", illegal_int_values, "aborting")
-    return type_map.get(type, "dummy")
+    if "valueRange_" in type:
+        type = "uint8"
+    return type_map.get(type, "INVALID_TYPE")
 
 def setup_c_file_context(node: NodeProtocol):
     # Setup the main context to store the data
