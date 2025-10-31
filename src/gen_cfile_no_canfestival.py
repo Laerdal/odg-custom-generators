@@ -419,21 +419,27 @@ def generate_file_content(node: NodeProtocol, headerfile: str) -> tuple[str, str
         strQuickIndex += "};\n"
 
     # --------------------------------------------------------------------------
-    #                        Write File Content
+    #                        Write Constants File Content
     # --------------------------------------------------------------------------
 
+    constantsFileContent = ctx.text(FILE_HEADER)
+    constantsFileContent += f"""
+#include "{headerfile.replace(".h", "Constants.h")}"
+/**************************************************************************/
+/* Declaration of mapped variables                                        */
+/**************************************************************************/
+"""
+    constantsFileContent += sourceFileContent
+
+
+    # --------------------------------------------------------------------------
+    #                        Write File Content
+    # --------------------------------------------------------------------------
     fileContent = ctx.text(FILE_HEADER)
     fileContent += f"""
 #include "{headerfile}"
 #include "data.h"
 """
-
-    fileContent += """
-/**************************************************************************/
-/* Declaration of mapped variables                                        */
-/**************************************************************************/
-"""
-    fileContent += sourceFileContent
 
     fileContent %= """
 /* Prototypes of function provided by object dictionnary */
@@ -563,10 +569,27 @@ static_assert(sizeof(INTEGER64) == sizeof(int64_t), "Error: canfestival and std 
 typedef struct struct_CO_Data CO_Data;
 extern CO_Data {NodeName}_Data;\n
 """
-    header += headerFileContent
     header %= "\n#endif // {file_include_name}\n"
 
-    return str(fileContent), str(header)
+    # --------------------------------------------------------------------------
+    #                      Write Header File Constants Content
+    # --------------------------------------------------------------------------
+
+    headerfile = headerfile.replace(".h", "Constants.h")
+    ctx["file_include_name"] = headerfile.replace(".", "_").upper()
+    constantsHeader = ctx.text(FILE_HEADER)
+    constantsHeader %= """
+#ifndef {file_include_name}
+#define {file_include_name}
+
+#include <cstdint>
+
+/* Master node data struct */
+"""
+    constantsHeader += headerFileContent
+    constantsHeader %= "\n#endif // {file_include_name}\n"
+
+    return str(fileContent), str(header), str(constantsFileContent), str(constantsHeader)
 
 
 # ------------------------------------------------------------------------------
@@ -577,14 +600,22 @@ def GenerateFile(filepath: TPath, node: NodeProtocol, pointers_dict=None):
     """Main function to generate the C file from a object dictionary node."""
     filepath = Path(filepath)
     headerpath = filepath.with_suffix(".h")
-    content, header = generate_file_content(
+    constantsPath = Path(filepath.stem + "Constants").with_suffix(".cpp")
+    constantsHeaderPath = constantsPath.with_suffix(".h")
+    print(constantsPath, constantsHeaderPath)
+    content, header, constantsContent, constantsHeader = generate_file_content(
         node, headerpath.name,
     )
-
     # Write main .c contents
     with open(filepath, "w", encoding="utf-8") as f:
         f.write(content)
 
-    # Write header file
     with open(headerpath, "w", encoding="utf-8") as f:
         f.write(header)
+
+    # write constants
+    with open(constantsPath, "w", encoding="utf-8") as f:
+        f.write(constantsContent)
+
+    with open(constantsHeaderPath, "w", encoding="utf-8") as f:
+        f.write(constantsHeader)
