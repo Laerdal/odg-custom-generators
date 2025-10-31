@@ -439,6 +439,7 @@ def generate_file_content(node: NodeProtocol, headerfile: str) -> tuple[str, str
     fileContent += f"""
 #include "{headerfile}"
 #include "data.h"
+#include "{headerfile.replace(".h", "Constants.h")}"
 """
 
     fileContent %= """
