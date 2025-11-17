@@ -199,7 +199,7 @@ namespace {NodeName} \n{{
                 subindexName = RE_NOTW.sub('', subentry_infos['name'])
                 if len(values) > 1:
                     headerObjDefinitionContent += (
-                        f"\t\tstruct {subindexName}{"Subindex" if subindexName == entryName else ""} : public Value<{subindex_type}>\n"
+                        f"\t\tstruct {subindexName}{'Subindex' if subindexName == entryName else ''} : public Value<{subindex_type}>\n"
                         f"\t\t{{\n"
                         f"\t\t\tstatic constexpr auto get()\n\t\t\t{{\n"
                         f"\t\t\t\treturn std::make_tuple(Index, Subindex, OdName, Name, sIdxName);\n\t\t\t}}\n\n"
