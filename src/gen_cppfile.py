@@ -171,7 +171,7 @@ namespace {NodeName} \n{{
 
         headerObjDefinitionContent += (
             f"{structDeclare}"
-            f"\t\tstatic constexpr uint32_t {'' if shortEntryName == entryName else shortEntryName}Index {{{ctx['index']:#04x}}};\n"
+            f"\t\tstatic constexpr uint16_t {'' if shortEntryName == entryName else shortEntryName}Index {{{ctx['index']:#04x}}};\n"
             f"\t\tstatic constexpr std::string_view Name = \"{entryName}Index\";\n\n"
         )
 
@@ -203,7 +203,7 @@ namespace {NodeName} \n{{
                         f"\t\t{{\n"
                         f"\t\t\tstatic constexpr auto get()\n\t\t\t{{\n"
                         f"\t\t\t\treturn std::make_tuple(Index, Subindex, OdName, Name, sIdxName);\n\t\t\t}}\n\n"
-                        f"\t\t\tstatic constexpr uint32_t Subindex {{{subindex:#04x}}};\n"
+                        f"\t\t\tstatic constexpr uint8_t Subindex {{{subindex:#04x}}};\n"
                         f"\t\t\tstatic constexpr std::string_view sIdxName = \"{subindexName}Subindex\";"
                         f"\n\t\t}};"
                     )
@@ -211,7 +211,7 @@ namespace {NodeName} \n{{
                     headerObjDefinitionContent += (
                         f"\t\tstatic constexpr auto get()\n\t\t{{\n"
                         f"\t\t\treturn std::make_tuple(Index, Subindex, OdName, Name, sIdxName);\n\t\t}}\n\n"
-                        f"\t\tstatic constexpr uint32_t Subindex {{{subindex:#04x}}};\n"
+                        f"\t\tstatic constexpr uint8_t Subindex {{{subindex:#04x}}};\n"
                         f"\t\tstatic constexpr std::string_view sIdxName = \"{subindexName}Subindex\";"
                     )
                 if params_infos["comment"]:
@@ -233,7 +233,7 @@ namespace {NodeName} \n{{
                 headerObjDefinitionContent += (
                     f"\t\tstatic constexpr auto get()\n\t\t{{\n"
                     f"\t\t\treturn std::make_tuple(Index, Subindex, OdName, Name, sIdxName);\n\t\t}}\n\n"
-                    f"\t\tstatic constexpr uint32_t Subindex {{{subindex:#04x}}};\n"
+                    f"\t\tstatic constexpr uint8_t Subindex {{{subindex:#04x}}};\n"
                     f"\t\tstatic constexpr std::string_view sIdxName = \"{subindexName}Subindex\";"
                 )
 
