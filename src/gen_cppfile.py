@@ -36,6 +36,7 @@ def generate_file_content(node: NodeProtocol, headerfile: str, pointers_dict=Non
 
     # Setup the main context to store the data
     ctx, listindex, variablelist, communicationlist, valueRangeContent  = setup_c_file_context(node)
+    ctx["NodeName"] = ctx["NodeName"].replace("OD", "Od")
 
     oldHeaderObjDefinitionContent = ctx.text()
     headerObjDefinitionContent = ctx.text()
@@ -81,7 +82,6 @@ namespace {NodeName} \n{{
         DataType m_Value{{}};
     }};\n
 """
-
     for index in listindex:
         ctx["index"] = index
         entry_infos = node.GetEntryInfos(index)
@@ -184,6 +184,7 @@ namespace {NodeName} \n{{
         generateSubIndexArrayComment = True
         for subindex, _ in enumerate(values):
             subentry_infos = node.GetSubentryInfos(index, subindex)
+            typename = node.GetTypeName(subentry_infos["type"])
             params_infos = node.GetParamsEntry(index, subindex)
             typeinfos = ctx.get_valid_type_infos(typename, [values])
             subindex_type = convert_from_canopen_to_c_type(typeinfos.ctype) if typeinfos.ctype != "visible_string" else "std::string"
@@ -202,17 +203,17 @@ namespace {NodeName} \n{{
                         f"\t\tstruct {subindexName}{'Subindex' if subindexName == entryName else ''} : public Value<{subindex_type}>\n"
                         f"\t\t{{\n"
                         f"\t\t\tstatic constexpr auto get()\n\t\t\t{{\n"
-                        f"\t\t\t\treturn std::make_tuple(Index, Subindex, OdName, Name, sIdxName);\n\t\t\t}}\n\n"
+                        f"\t\t\t\treturn std::make_tuple(Index, Subindex, OdName, Name, SubIndexName);\n\t\t\t}}\n\n"
                         f"\t\t\tstatic constexpr uint8_t Subindex {{{subindex:#04x}}};\n"
-                        f"\t\t\tstatic constexpr std::string_view sIdxName = \"{subindexName}Subindex\";"
+                        f"\t\t\tstatic constexpr std::string_view SubIndexName = \"{subindexName}Subindex\";"
                         f"\n\t\t}};"
                     )
                 else:
                     headerObjDefinitionContent += (
                         f"\t\tstatic constexpr auto get()\n\t\t{{\n"
-                        f"\t\t\treturn std::make_tuple(Index, Subindex, OdName, Name, sIdxName);\n\t\t}}\n\n"
+                        f"\t\t\treturn std::make_tuple(Index, Subindex, OdName, Name, SubIndexName);\n\t\t}}\n\n"
                         f"\t\tstatic constexpr uint8_t Subindex {{{subindex:#04x}}};\n"
-                        f"\t\tstatic constexpr std::string_view sIdxName = \"{subindexName}Subindex\";"
+                        f"\t\tstatic constexpr std::string_view SubIndexName = \"{subindexName}Subindex\";"
                     )
                 if params_infos["comment"]:
                     headerObjDefinitionContent += " /*" + params_infos["comment"] + "*/\n"
@@ -231,13 +232,10 @@ namespace {NodeName} \n{{
                     f"_sIdx {subindex:#04x}\n"
                 )
                 headerObjDefinitionContent += (
-                    f"\t\tstatic constexpr auto get()\n\t\t{{\n"
-                    f"\t\t\treturn std::make_tuple(Index, Subindex, OdName, Name, sIdxName);\n\t\t}}\n\n"
-                    f"\t\tstatic constexpr uint8_t Subindex {{{subindex:#04x}}};\n"
-                    f"\t\tstatic constexpr std::string_view sIdxName = \"{subindexName}Subindex\";"
+                    f"\t\tstatic constexpr auto get(uint8_t subIndex)\n\t\t{{\n"
+                    f"\t\t\treturn std::make_tuple(Index, subIndex, OdName, Name, \"\");\n\t\t}}\n\n"
                 )
-
-                headerObjDefinitionContent += " /*subindex struct not generated for array objects*/\n\n"
+                headerObjDefinitionContent += "\t\t/*subindex not generated for array objects*/\n\n"
                 oldHeaderObjDefinitionContent += " /*subindex struct not generated for array objects*/\n\n"
         headerObjDefinitionContent += "\t};\n\n"
     headerObjDefinitionContent += "}\n"
