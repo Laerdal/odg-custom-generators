@@ -33,6 +33,8 @@ usingOldOdName = True
 
 def toggle_od_name_version(ctx):
     global usingOldOdName
+    if ctx["NodeName"] is None:
+        return
     if usingOldOdName:
         ctx["NodeName"] = ctx["NodeName"].replace("OD", "Od")
         usingOldOdName = False
@@ -197,7 +199,10 @@ namespace {NodeName} \n{{
         generateSubIndexArrayComment = True
         for subindex, _ in enumerate(values):
             subentry_infos = node.GetSubentryInfos(index, subindex)
-            typename = node.GetTypeName(subentry_infos["type"])
+            #there is an issue when setting the typename for each subindex with this OD file - some index and subindex entires have a name which is a canfestival data type (like UNSIGNED8)
+            #this OD is unused in the codebase though
+            if ctx["NodeName"] != "CANopenDUTOD":
+                typename = node.GetTypeName(subentry_infos["type"])
             params_infos = node.GetParamsEntry(index, subindex)
             typeinfos = ctx.get_valid_type_infos(typename, [values])
             subindex_type = convert_from_canopen_to_c_type(typeinfos.ctype) if typeinfos.ctype != "visible_string" else "std::string"
