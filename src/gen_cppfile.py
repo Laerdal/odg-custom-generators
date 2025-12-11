@@ -65,28 +65,28 @@ namespace {NodeName} \n{{
     struct Value
     {{
         using DataType = T;
-        Value() = default;
-        Value(const Value&) = default;
-        Value(Value&&) = default;
-        Value& operator=(const Value&) = default;
-        Value& operator=(Value&&) = default;
-        Value(const DataType& value) : m_Value(value) {{}}
-        Value(DataType&& value) : m_Value(std::move(value)) {{}}
-        Value& operator=(const DataType& value)
+        constexpr Value() = default;
+        constexpr Value(const Value&) = default;
+        constexpr Value(Value&&) = default;
+        constexpr Value& operator=(const Value&) = default;
+        constexpr Value& operator=(Value&&) = default;
+        constexpr Value(const DataType& value) : m_Value(value) {{}}
+        constexpr Value(DataType&& value) : m_Value(std::move(value)) {{}}
+        constexpr Value& operator=(const DataType& value)
         {{
             m_Value = value;
             return *this;
         }}
-        Value& operator=(DataType&& value)
+        constexpr Value& operator=(DataType&& value)
         {{
             m_Value = std::move(value);
             return *this;
         }}
-        operator const DataType&() const noexcept
+        constexpr operator const DataType&() const noexcept
         {{
             return m_Value;
         }}
-        operator DataType&() noexcept
+        constexpr operator DataType&() noexcept
         {{
             return m_Value;
         }}
