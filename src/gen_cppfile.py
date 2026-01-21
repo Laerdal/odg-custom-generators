@@ -42,6 +42,32 @@ def toggle_od_name_version(ctx):
         ctx["NodeName"] = ctx["NodeName"].replace("Od", "OD")
         usingOldOdName = True
 
+def convert_from_canopen_to_cpp_type(type):
+    # Used to convert types when ctype is an illegal non-int value (e.g. valueRange_X)
+    type_map = {}
+    type_map["boolean"] = "OD::Boolean"
+    type_map["int8"] = "OD::Int8"
+    type_map["int16"] = "OD::Int16"
+    type_map["int32"] = "OD::Int32"
+    type_map["int40"] = "OD::Int40"
+    type_map["int48"] = "OD::Int48"
+    type_map["int56"] = "OD::Int56"
+    type_map["int64"] = "OD::Int64"
+    type_map["uint8"] = "OD::UInt8"
+    type_map["uint16"] = "OD::UInt16"
+    type_map["uint32"] = "OD::UInt32"
+    type_map["uint40"] = "OD::UInt40"
+    type_map["uint48"] = "OD::UInt48"
+    type_map["uint56"] = "OD::UInt56"
+    type_map["uint64"] = "OD::UInt64"
+    type_map["real32"] = "OD::Real32"
+    type_map["real64"] = "OD::Real64"
+    type_map["visible_string"] = "OD::VisibleString"
+    type_map["octet_string"] = "OD::OctetString"
+    if "valueRange_" in type:
+        type = "uint8"
+    return type_map.get(type, "OD::Unknown")
+
 def generate_file_content(node: NodeProtocol, headerfile: str, pointers_dict=None) -> tuple[str, str, str, str, str]:
     # FIXME: Too many camelCase vars in here
     # pylint: disable=invalid-name
@@ -55,44 +81,10 @@ def generate_file_content(node: NodeProtocol, headerfile: str, pointers_dict=Non
     headerObjDefinitionContent += "\n#include <cstdint>\n"
     headerObjDefinitionContent += "#include <tuple>\n"
     headerObjDefinitionContent += "#include <string>\n"
+    headerObjDefinitionContent += "#include \"od_value.h\"\n"
     headerObjDefinitionContent %= """
 namespace {NodeName} \n{{
 \tstatic constexpr std::string_view OdName = \"{NodeName}\";
-"""
-
-    headerObjDefinitionContent %= """
-    template<typename T>
-    struct Value
-    {{
-        using DataType = T;
-        constexpr Value() = default;
-        constexpr Value(const Value&) = default;
-        constexpr Value(Value&&) = default;
-        constexpr Value& operator=(const Value&) = default;
-        constexpr Value& operator=(Value&&) = default;
-        constexpr Value(const DataType& value) : m_Value(value) {{}}
-        constexpr Value(DataType&& value) : m_Value(std::move(value)) {{}}
-        constexpr Value& operator=(const DataType& value)
-        {{
-            m_Value = value;
-            return *this;
-        }}
-        constexpr Value& operator=(DataType&& value)
-        {{
-            m_Value = std::move(value);
-            return *this;
-        }}
-        constexpr operator const DataType&() const noexcept
-        {{
-            return m_Value;
-        }}
-        constexpr operator DataType&() noexcept
-        {{
-            return m_Value;
-        }}
-    private:
-        DataType m_Value{{}};
-    }};\n
 """
     toggle_od_name_version(ctx)
     for index in listindex:
@@ -176,11 +168,11 @@ namespace {NodeName} \n{{
         entryName = f"{RE_NOTW.sub('', ctx['EntryName']).strip()}"
         shortEntryName = entryName.replace(ctx['EntryName'], '')
         typeinfos = ctx.get_valid_type_infos(typename, [values])
-        subindex_type = convert_from_canopen_to_c_type(typeinfos.ctype) if typeinfos.ctype != "visible_string" else "std::string"
+        subindex_type = convert_from_canopen_to_cpp_type(typeinfos.ctype)
 
         structDeclare = f"\tstruct {entryName}\n\t{{\n"
         if len(values) == 1 or entry_infos["struct"] & OD.IdenticalSubindexes:
-            structDeclare = f"\tstruct {entryName} : public Value<{subindex_type}>\n\t{{\n"
+            structDeclare = f"\tstruct {entryName} : public OD::Value<{subindex_type}>\n\t{{\n"
 
         toggle_od_name_version(ctx)
         headerObjDefinitionContent += (
@@ -205,7 +197,7 @@ namespace {NodeName} \n{{
                 typename = node.GetTypeName(subentry_infos["type"])
             params_infos = node.GetParamsEntry(index, subindex)
             typeinfos = ctx.get_valid_type_infos(typename, [values])
-            subindex_type = convert_from_canopen_to_c_type(typeinfos.ctype) if typeinfos.ctype != "visible_string" else "std::string"
+            subindex_type = convert_from_canopen_to_cpp_type(typeinfos.ctype)
             if not entry_infos["struct"] & OD.IdenticalSubindexes:
                 generateSubIndexArrayComment = True
                 oldHeaderObjDefinitionContent += (
@@ -219,7 +211,7 @@ namespace {NodeName} \n{{
                 if len(values) > 1:
                     toggle_od_name_version(ctx)
                     headerObjDefinitionContent += (
-                        f"\t\tstruct {subindexName}{'Subindex' if subindexName == entryName else ''} : public Value<{subindex_type}>\n"
+                        f"\t\tstruct {subindexName}{'Subindex' if subindexName == entryName else ''} : public OD::Value<{subindex_type}>\n"
                         f"\t\t{{\n"
                         f"\t\t\tstatic constexpr auto get()\n\t\t\t{{\n"
                         f"\t\t\t\treturn std::make_tuple(Index, Subindex, OdName, Name, SubIndexName);\n\t\t\t}}\n\n"
