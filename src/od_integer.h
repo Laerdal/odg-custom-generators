@@ -8,11 +8,11 @@
 
 namespace OD
 {
-    template<uint8_t N, bool SIGNED> class Integer
+    template<uint8_t BITS, bool SIGNED> class Integer
     {
     public:
-        static_assert(N == 40 || N == 48 || N == 56, "Only support bit sizes of 40, 48, or 56");
-        static constexpr uint8_t ByteSize {N / 8};
+        static_assert(BITS == 40 || BITS == 48 || BITS == 56, "Only support bit sizes of 40, 48, or 56");
+        static constexpr uint8_t ByteSize {BITS / 8};
         using ValueType = typename std::conditional_t < SIGNED, std::conditional_t < ByteSize<4, int32_t, int64_t>,
               std::conditional_t<ByteSize<4, uint32_t, uint64_t>>;
 
@@ -43,7 +43,7 @@ namespace OD
             return m_Value;
         }
 
-        constexpr auto operator<=>(const Integer<N, SIGNED>& other) const = default;
+        constexpr auto operator<=>(const Integer<BITS, SIGNED>& other) const = default;
 
         std::string toString() const
         {
