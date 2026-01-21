@@ -49,7 +49,7 @@ namespace OD
         {
             return &m_Value;
         }        
-        constexpr auto operator<=>(const Value& other) const noexcept = default;
+        auto operator<=>(const Value& other) const noexcept = default;
     private:
         DataType m_Value{};
     };

@@ -43,7 +43,7 @@ namespace OD
             return m_Value;
         }
 
-        constexpr auto operator<=>(const Integer<BITS, SIGNED>& other) const = default;
+        auto operator<=>(const Integer<BITS, SIGNED>& other) const = default;
 
         std::string toString() const
         {
