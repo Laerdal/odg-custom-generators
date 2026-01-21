@@ -52,7 +52,7 @@ def convert_from_canopen_to_cpp_type(type):
     type_map["int40"] = "OD::Int40"
     type_map["int48"] = "OD::Int48"
     type_map["int56"] = "OD::Int56"
-    type_map["int64"] = "OD::UInt64"
+    type_map["int64"] = "OD::Int64"
     type_map["uint8"] = "OD::UInt8"
     type_map["uint16"] = "OD::UInt16"
     type_map["uint32"] = "OD::UInt32"
