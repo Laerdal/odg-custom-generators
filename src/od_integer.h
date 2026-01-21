@@ -11,7 +11,7 @@ namespace OD
     template<uint8_t BITS, bool SIGNED> class Integer
     {
     public:
-        static_assert(BITS == 40 || BITS == 48 || BITS == 56, "Only support bit sizes of 40, 48, or 56");
+        static_assert(BITS == 24 || BITS == 40 || BITS == 48 || BITS == 56, "Only support bit sizes of 24, 40, 48, or 56");
         static constexpr uint8_t ByteSize {BITS / 8};
         using ValueType = typename std::conditional_t<SIGNED, std::conditional_t<(ByteSize < 4), int32_t, int64_t>,
                                                       std::conditional_t<(ByteSize < 4), uint32_t, uint64_t>>;

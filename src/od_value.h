@@ -41,13 +41,13 @@ namespace OD
         {
             m_Value = value;
         }
-        constexpr DataType& operator->() noexcept
+        constexpr DataType* operator->() noexcept
         {
-            return m_Value;
+            return &m_Value;
         }
-        constexpr const DataType& operator->() const noexcept
+        constexpr const DataType* operator->() const noexcept
         {
-            return m_Value;
+            return &m_Value;
         }        
         constexpr auto operator<=>(const Value& other) const noexcept = default;
     private:
