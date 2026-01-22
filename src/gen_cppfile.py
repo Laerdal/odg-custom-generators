@@ -178,7 +178,7 @@ namespace {NodeName} \n{{
         headerObjDefinitionContent += (
             f"{structDeclare}"
             f"\t\tstatic constexpr uint16_t {'' if shortEntryName == entryName else shortEntryName}Index {{{ctx['index']:#04x}}};\n"
-            f"\t\tstatic constexpr std::string_view Name = \"{entryName}Index\";\n\n"
+            f"\t\tstatic constexpr std::string_view IndexName = \"{entryName}\";\n\n"
         )
         toggle_od_name_version(ctx)
 
@@ -214,9 +214,9 @@ namespace {NodeName} \n{{
                         f"\t\tstruct {subindexName}{'Subindex' if subindexName == entryName else ''} : public OD::Value<{subindex_type}>\n"
                         f"\t\t{{\n"
                         f"\t\t\tstatic constexpr auto get()\n\t\t\t{{\n"
-                        f"\t\t\t\treturn std::make_tuple(Index, Subindex, OdName, Name, SubIndexName);\n\t\t\t}}\n\n"
+                        f"\t\t\t\treturn std::make_tuple(Index, Subindex, OdName, IndexName, SubIndexName);\n\t\t\t}}\n\n"
                         f"\t\t\tstatic constexpr uint8_t Subindex {{{subindex:#04x}}};\n"
-                        f"\t\t\tstatic constexpr std::string_view SubIndexName = \"{subindexName}Subindex\";"
+                        f"\t\t\tstatic constexpr std::string_view SubIndexName = \"{subindexName}\";"
                         f"\n\t\t}};"
                     )
                     toggle_od_name_version(ctx)
@@ -224,9 +224,8 @@ namespace {NodeName} \n{{
                     toggle_od_name_version(ctx)
                     headerObjDefinitionContent += (
                         f"\t\tstatic constexpr auto get()\n\t\t{{\n"
-                        f"\t\t\treturn std::make_tuple(Index, Subindex, OdName, Name, SubIndexName);\n\t\t}}\n\n"
+                        f"\t\t\treturn std::make_tuple(Index, Subindex, OdName, IndexName, \"_\");\n\t\t}}\n\n"
                         f"\t\tstatic constexpr uint8_t Subindex {{{subindex:#04x}}};\n"
-                        f"\t\tstatic constexpr std::string_view SubIndexName = \"{subindexName}Subindex\";"
                     )
                     toggle_od_name_version(ctx)
                 if params_infos["comment"]:
@@ -248,7 +247,7 @@ namespace {NodeName} \n{{
                 toggle_od_name_version(ctx)
                 headerObjDefinitionContent += (
                     f"\t\tstatic constexpr auto get(uint8_t subIndex)\n\t\t{{\n"
-                    f"\t\t\treturn std::make_tuple(Index, subIndex, OdName, Name, \"\");\n\t\t}}\n\n"
+                    f"\t\t\treturn std::make_tuple(Index, subIndex, OdName, IndexName, \"\");\n\t\t}}\n\n"
                 )
                 headerObjDefinitionContent += "\t\t/*subindex not generated for array objects*/\n\n"
                 toggle_od_name_version(ctx)
