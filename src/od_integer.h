@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <format>
 
 namespace OD
 {
@@ -79,3 +80,11 @@ namespace OD
     using OctetString = std::vector<std::byte>;
     using Unknown = void;
 } // namespace OD
+
+template<uint8_t BITS, bool SIGNED> struct std::formatter<OD::Integer<BITS, SIGNED>> : std::formatter<std::string>
+{
+    auto format(const OD::Integer<BITS, SIGNED>& integer, std::format_context& ctx) const
+    {
+        return std::formatter<std::string>::format(std::to_string(integer.get()), ctx);
+    }
+};
