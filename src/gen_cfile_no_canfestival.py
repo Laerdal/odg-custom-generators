@@ -424,7 +424,7 @@ def generate_file_content(node: NodeProtocol, headerfile: str) -> tuple[str, str
 
     constantsFileContent = ctx.text(FILE_HEADER)
     constantsFileContent += f"""
-#include "{headerfile.replace(".h", "Constants.h")}"
+#include "{headerfile.replace(".h", "Globals.h")}"
 /**************************************************************************/
 /* Declaration of mapped variables                                        */
 /**************************************************************************/
@@ -439,7 +439,7 @@ def generate_file_content(node: NodeProtocol, headerfile: str) -> tuple[str, str
     fileContent += f"""
 #include "{headerfile}"
 #include "data.h"
-#include "{headerfile.replace(".h", "Constants.h")}"
+#include "{headerfile.replace(".h", "Globals.h")}"
 """
 
     fileContent %= """
@@ -576,7 +576,7 @@ extern CO_Data {NodeName}_Data;\n
     #                      Write Header File Constants Content
     # --------------------------------------------------------------------------
 
-    headerfile = headerfile.replace(".h", "Constants.h")
+    headerfile = headerfile.replace(".h", "Globals.h")
     ctx["file_include_name"] = headerfile.replace(".", "_").upper()
     constantsHeader = ctx.text(FILE_HEADER)
     constantsHeader %= """
@@ -601,7 +601,7 @@ def GenerateFile(filepath: TPath, node: NodeProtocol, pointers_dict=None):
     """Main function to generate the C file from a object dictionary node."""
     filepath = Path(filepath)
     headerpath = filepath.with_suffix(".h")
-    constantsPath = Path(filepath.stem + "Constants").with_suffix(".cpp")
+    constantsPath = Path(filepath.stem + "Globals").with_suffix(".cpp")
     constantsHeaderPath = constantsPath.with_suffix(".h")
     print(constantsPath, constantsHeaderPath)
     content, header, constantsContent, constantsHeader = generate_file_content(
