@@ -431,7 +431,7 @@ namespace OdGlobals {{
 /**************************************************************************/
 """
     globalsFileContent += sourceFileContent
-    globalsFileContent += "}}"
+    globalsFileContent += "}"
 
 
     # --------------------------------------------------------------------------
