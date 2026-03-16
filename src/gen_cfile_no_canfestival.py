@@ -425,12 +425,13 @@ def generate_file_content(node: NodeProtocol, headerfile: str) -> tuple[str, str
     globalsFileContent = ctx.text(FILE_HEADER)
     globalsFileContent += f"""
 #include "{headerfile.replace(".h", "Globals.h")}"
-using namespace OdGlobals;
+namespace OdGlobals {{
 /**************************************************************************/
 /* Declaration of mapped variables                                        */
 /**************************************************************************/
 """
     globalsFileContent += sourceFileContent
+    globalsFileContent += "}}"
 
 
     # --------------------------------------------------------------------------
